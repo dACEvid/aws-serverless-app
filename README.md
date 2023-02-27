@@ -5,4 +5,5 @@ The diagram of the solution is the following:
 
 Things to consider:
 1) The email needs to be registered first in Simple Email Service (SES)
+2) Create Step Functions State Machine from the template. This just sends a remainder with a method of our choice
 

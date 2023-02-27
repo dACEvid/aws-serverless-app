@@ -1,0 +1,82 @@
+{
+  "Comment": "Amazon States Language example.",
+  "StartAt": "SendReminder",
+  "States": {
+    "SendReminder": {
+      "Type": "Wait",
+      "SecondsPath": "$.waitSeconds",
+      "Next": "ChoiceState"
+    },
+    "ChoiceState": {
+      "Type" : "Choice",
+      "Choices": [
+        {
+          "Variable": "$.preference",
+          "StringEquals": "email",
+          "Next": "EmailReminder"
+        },
+        {
+          "Variable": "$.preference",
+          "StringEquals": "sms",
+          "Next": "TextReminder"
+        },
+        {
+          "Variable": "$.preference",
+          "StringEquals": "both",
+          "Next": "BothReminders"
+        }
+      ],
+      "Default": "DefaultState"
+    },
+
+    "EmailReminder": {
+      "Type" : "Task",
+      "Resource": "ARN_of_email_reminder.py",
+      "Next": "NextState"
+    },
+
+    "TextReminder": {
+      "Type" : "Task",
+      "Resource": "ARN_of_sms_reminder.py",
+      "Next": "NextState"
+    },
+    
+    "BothReminders": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "EmailReminderPar",
+          "States": {
+            "EmailReminderPar": {
+              "Type" : "Task",
+              "Resource": "ARN_of_email_reminder.py",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "TextReminderPar",
+          "States": {
+            "TextReminderPar": {
+              "Type" : "Task",
+              "Resource": "ARN_of_sms_reminder.py",
+              "End": true
+            }
+          }
+        }
+      ],
+      "Next": "NextState"
+    },
+    
+    "DefaultState": {
+      "Type": "Fail",
+      "Error": "DefaultStateError",
+      "Cause": "No Matches!"
+    },
+
+    "NextState": {
+      "Type": "Pass",
+      "End": true
+    }
+  }
+}
